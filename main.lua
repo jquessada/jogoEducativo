@@ -17,10 +17,15 @@ local moneyAreaEntered = false -- variável que indica se o círculo entrou na �
 --variaveis in servem para verificar se o player esta no local
 --variaveis so com o nome servem para verificar se elas precisam ser atualizadas
 --variaveis status armazenam o valor da barra
+local casino = false -- variaveis para jogar no cassino
+local inCasino = false
+local casinoStatus = 100
+local betTrue = false
+local betFalse = false
+local casinoAreaEntered = false
 
 --essa função verifica a posição do player
 function verifyPosition()
-  -- verifica se a bola está dentro de uma das áreas retangulares
   if x > 0 and x < 200 and y > 0 and y < 100 then
     money = true
     inMoney = true
@@ -34,11 +39,20 @@ function verifyPosition()
   elseif x > 0 and x < 200 and y > 500 and y < 600 then
     fun = true
     inFun = true
+  elseif x > 600 and x < 800 and y > 500 and y < 600 then
+    casino = true
+    inCasino = true
+    if not casinoAreaEntered then
+      casinoAreaEntered = true
+      playGame()
+    end
   else 
     inMoney = false
     inSocialLife = false
     inFun = false
+    inCasino = false
     moneyAreaEntered = false
+    casinoAreaEntered = false
   end
 end
 
@@ -67,6 +81,17 @@ function updateStatus()
     money = false
     spend = false
   end
+  if inCasino == false and casino == true and betTrue == true then
+    moneyStatus = moneyStatus + 10
+    funStatus = funStatus + 10
+    casino = false
+    betTrue = false
+  elseif inCasino == false and casino == true and betFalse == true then
+    moneyStatus = moneyStatus - 10
+    funStatus = funStatus + 10
+    casino = false
+    betFalse = false
+  end
   if inSocialLife == false and socialLife == true then
     socialLifeStatus = socialLifeStatus - 10
     socialLife = false
@@ -74,6 +99,27 @@ function updateStatus()
   if inFun == false and fun == true then
     funStatus = funStatus - 10
     fun = false
+  end
+end
+
+--logica do cassino
+function playGame()
+  if inCasino == true then
+    local message = "Você deseja jogar um jogo?"
+    local buttons = {"Sim"}
+    local pressed = love.window.showMessageBox("Bem vindo ao Cassino!", message, buttons)
+    if buttons[pressed] == "Sim" then
+      local message = "Aperte sair para sair do cassino"
+      local buttons = {"Sair"}
+      local number = math.random(1, 2)
+      if 1 == number then
+        love.window.showMessageBox("Parabéns, você ganhou!", message, buttons)
+        betTrue = true
+      else
+        love.window.showMessageBox("Você perdeu!", message, buttons)
+        betFalse = true
+      end
+    end
   end
 end
 
@@ -120,6 +166,8 @@ function love.draw()
   love.graphics.rectangle("fill", 600, 0, 200, 100)
   love.graphics.setColor(1, 1, 1)
   love.graphics.rectangle("fill", 0, 500, 200, 100)
+  love.graphics.setColor(1, 1, 1)
+  love.graphics.rectangle("fill", 600, 500, 200, 100)
   
   -- usuário
   love.graphics.setColor(255, 255, 255)
