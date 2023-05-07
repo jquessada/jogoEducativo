@@ -1,6 +1,6 @@
 local x, y = 280, 280
 local radius = 20
-local speed = 120 -- velocidade da bola em pixels por segundo
+local speed = 180 -- velocidade da bola em pixels por segundo
 local dx, dy = 0, 0 -- direção da bola
 local money = false
 local socialLife = false
@@ -23,6 +23,9 @@ local casinoStatus = 100
 local betTrue = false
 local betFalse = false
 local casinoAreaEntered = false
+local maxTime = 30
+local currentTime = 0 --variaveis para controlar o timeout do jogo
+local gameEnded = false
 
 --essa função verifica a posição do player
 function verifyPosition()
@@ -112,7 +115,7 @@ function playGame()
       local message = "Aperte sair para sair do cassino"
       local buttons = {"Sair"}
       local number = math.random(1, 2)
-      if 1 == number then
+      if number == 1 then
         love.window.showMessageBox("Parabéns, você ganhou!", message, buttons)
         betTrue = true
       else
@@ -124,22 +127,34 @@ function playGame()
 end
 
 function love.update(dt)
-  verifyPosition()
-  updateStatus()
-  -- atualiza a posição da bola
-  x = x + dx * speed * dt
-  y = y + dy * speed * dt
-  
-  -- verifica se a bola atingiu as bordas da janela
-  if x < radius then
-    x = radius
-  elseif x > love.graphics.getWidth() - radius then
-    x = love.graphics.getWidth() - radius
-  end
-  if y < radius then
-    y = radius
-  elseif y > love.graphics.getHeight() - radius then
-    y = love.graphics.getHeight() - radius
+  if not gameEnded then
+    currentTime = currentTime + dt
+    if currentTime >= maxTime then
+      gameEnded = true
+      if math.abs(moneyStatus - funStatus) >= 20 then
+        love.window.showMessageBox("O tempo acabou!", "Parece que você não foi capaz de equilibrar a barra de finanças e a barra de diversão :(", {"OK"})
+      else
+        love.window.showMessageBox("O tempo acabou!", "Parabéns! Você foi capaz de equilibrar a barra de finanças e a barra de diversão :)", {"OK"})
+      end
+    else
+      verifyPosition()
+      updateStatus()
+      -- atualiza a posição da bola
+      x = x + dx * speed * dt
+      y = y + dy * speed * dt
+      
+      -- verifica se a bola atingiu as bordas da janela
+      if x < radius then
+        x = radius
+      elseif x > love.graphics.getWidth() - radius then
+        x = love.graphics.getWidth() - radius
+      end
+      if y < radius then
+        y = radius
+      elseif y > love.graphics.getHeight() - radius then
+        y = love.graphics.getHeight() - radius
+      end
+    end
   end
 end
 
